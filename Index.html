@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Scientific Calculator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: #eeeeee;
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.calculator {
+    width: 380px;
+    max-width: 100%;
+    background: white;
+    padding: 18px;
+    border-radius: 22px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+}
+
+/* TOP */
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.mode {
+    display: flex;
+    gap: 5px;
+}
+
+.mode button,
+.history-button {
+    border: none;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.mode button {
+    background: #e5e5e5;
+    color: #555;
+}
+
+.mode button.active {
+    background: #ff8c00;
+    color: white;
+}
+
+.history-button {
+    background: #333;
+    color: white;
+}
+
+/* DISPLAY */
+
+.display {
+    background: #f5f5f5;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 12px;
+    text-align: right;
+    min-height: 100px;
+
+    overflow: hidden;
+}
+
+.expression {
+    color: #888;
+    font-size: 16px;
+    min-height: 25px;
+    word-break: break-all;
+}
+
+.result {
+    color: #222;
+    font-size: 32px;
+    font-weight: bold;
+    min-height: 40px;
+    word-break: break-all;
+}
+
+/* SCIENTIFIC BUTTONS */
+
+.scientific {
+    display: none;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 7px;
+    margin-bottom: 8px;
+}
+
+.scientific.show {
+    display: grid;
+}
+
+/* MAIN BUTTONS */
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.calcButton {
+    min-height: 54px;
+    border: none;
+    border-radius: 13px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.08s;
+}
+
+.calcButton:active {
+    transform: scale(0.94);
+}
+
+/* NUMBERS = ORANGE */
+
+.number {
+    background: #fff0df;
+    color: #ff7500;
+}
+
+/* OPERATORS = GREY */
+
+.operator {
+    background: #e2e2e2;
+    color: #666;
+}
+
+/* FUNCTIONS = BLACK */
+
+.function {
+    background: #e8e8e8;
+    color: black;
+    font-size: 14px;
+}
+
+/* EQUALS */
+
+.equals {
+    background: #ff8c00;
+    color: white;
+}
+
+/* HISTORY */
+
+.history-panel {
+    display: none;
+    margin-top: 15px;
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 12px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.history-panel.show {
+    display: block;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.history-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.clear-history {
+    border: none;
+    background: #ddd;
+    padding: 6px 9px;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.history-item {
+    background: white;
+    padding: 9px;
+    margin-top: 7px;
+    border-radius: 8px;
+    color: #777;
+}
+
+.history-item b {
+    color: #222;
+}
+
+/* MOBILE */
+
+@media (max-width: 400px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .calculator {
+        padding: 14px;
+    }
+
+    .calcButton {
+        min-height: 50px;
+    }
+
+    .result {
+        font-size: 28px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+
+    <!-- TOP -->
+    <div class="top">
+
+        <div class="mode">
+            <button id="normalBtn" class="active">
+                Normal
+            </button>
+
+            <button id="scientificBtn">
+                Scientific
+            </button>
+        </div>
+
+        <button id="historyBtn" class="history-button">
+            History
+        </button>
+
+    </div>
+
+
+    <!-- DISPLAY -->
+
+    <div class="display">
+
+        <div id="expression" class="expression">
+            0
+        </div>
+
+        <div id="result" class="result">
+            0
+        </div>
+
+    </div>
+
+
+    <!-- SCIENTIFIC BUTTONS -->
+
+    <div id="scientificButtons" class="scientific">
+
+        <button class="calcButton function"
+                onclick="addFunction('sin')">
+            sin
+        </button>
+
+        <button class="calcButton function"
+                onclick="addFunction('cos')">
+            cos
+        </button>
+
+        <button class="calcButton function"
+                onclick="addFunction('tan')">
+            tan
+        </button>
+
+        <button class="calcButton function"
+                onclick="addFunction('log')">
+            log
+        </button>
+
+        <button class="calcButton function"
+                onclick="addFunction('ln')">
+            ln
+        </button>
+
+        <button class="calcButton function"
+                onclick="addFunction('sqrt')">
+            √
+        </button>
+
+        <button class="calcButton function"
+                onclick="addSquare()">
+            x²
+        </button>
+
+        <button class="calcButton function"
+                onclick="addValue('π')">
+            π
+        </button>
+
+        <button class="calcButton function"
+                onclick="addValue('e')">
+            e
+        </button>
+
+        <button class="calcButton function"
+                onclick="addValue('^')">
+            xʸ
+        </button>
+
+    </div>
+
+
+    <!-- MAIN BUTTONS -->
+
+    <div class="buttons">
+
+        <button class="calcButton operator"
+                onclick="clearCalculator()">
+            AC
+        </button>
+
+        <button class="calcButton operator"
+                onclick="backspace()">
+            ⌫
+        </button>
+
+        <button class="calcButton operator"
+                onclick="addValue('(')">
+            (
+        </button>
+
+        <button class="calcButton operator"
+                onclick="addValue(')')">
+            )
+        </button>
+
+
+        <button class="calcButton number"
+                onclick="addValue('7')">
+            7
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('8')">
+            8
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('9')">
+            9
+        </button>
+
+        <button class="calcButton operator"
+                onclick="addValue('/')">
+            ÷
+        </button>
+
+
+        <button class="calcButton number"
+                onclick="addValue('4')">
+            4
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('5')">
+            5
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('6')">
+            6
+        </button>
+
+        <button class="calcButton operator"
+                onclick="addValue('*')">
+            ×
+        </button>
+
+
+        <button class="calcButton number"
+                onclick="addValue('1')">
+            1
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('2')">
+            2
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('3')">
+            3
+        </button>
+
+        <button class="calcButton operator"
+                onclick="addValue('-')">
+            −
+        </button>
+
+
+        <button class="calcButton number"
+                onclick="addValue('0')">
+            0
+        </button>
+
+        <button class="calcButton number"
+                onclick="addValue('.')">
+            .
+        </button>
+
+        <button class="calcButton equals"
+                onclick="calculate()">
+            =
+        </button>
+
+        <button class="calcButton operator"
+                onclick="addValue('+')">
+            +
+        </button>
+
+    </div>
+
+
+    <!-- HISTORY -->
+
+    <div id="historyPanel" class="history-panel">
+
+        <div class="history-header">
+
+            <div class="history-title">
+                Calculation History
+            </div>
+
+            <button class="clear-history"
+                    onclick="clearHistory()">
+                Clear
+            </button>
+
+        </div>
+
+        <div id="historyList">
+            No calculations yet.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================
+   CALCULATOR DATA
+========================================= */
+
+let expression = "";
+
+let history = [];
+
+try {
+
+    history = JSON.parse(
+        localStorage.getItem("calculatorHistory") || "[]"
+    );
+
+} catch {
+
+    history = [];
+
+}
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const expressionDisplay =
+    document.getElementById("expression");
+
+const resultDisplay =
+    document.getElementById("result");
+
+const scientificButtons =
+    document.getElementById("scientificButtons");
+
+const normalButton =
+    document.getElementById("normalBtn");
+
+const scientificButton =
+    document.getElementById("scientificBtn");
+
+const historyButton =
+    document.getElementById("historyBtn");
+
+const historyPanel =
+    document.getElementById("historyPanel");
+
+const historyList =
+    document.getElementById("historyList");
+
+
+/* =========================================
+   DISPLAY
+========================================= */
+
+function updateDisplay() {
+
+    expressionDisplay.textContent =
+        expression || "0";
+
+}
+
+
+/* =========================================
+   ADD VALUES
+========================================= */
+
+function addValue(value) {
+
+    /*
+       If an answer was previously shown,
+       typing a number starts a new calculation.
+    */
+
+    if (
+        resultDisplay.textContent !== "0" &&
+        expression === ""
+    ) {
+
+        resultDisplay.textContent = "0";
+
+    }
+
+    expression += value;
+
+    updateDisplay();
+
+}
+
+
+/* =========================================
+   SCIENTIFIC FUNCTIONS
+========================================= */
+
+function addFunction(functionName) {
+
+    /*
+       √ button inserts sqrt(
+       instead of just sqrt.
+    */
+
+    expression += functionName + "(";
+
+    updateDisplay();
+
+}
+
+
+/* =========================================
+   SQUARE
+========================================= */
+
+function addSquare() {
+
+    if (expression === "") {
+        return;
+    }
+
+    expression = "(" + expression + ")^2";
+
+    updateDisplay();
+
+}
+
+
+/* =========================================
+   CLEAR
+========================================= */
+
+function clearCalculator() {
+
+    expression = "";
+
+    resultDisplay.textContent = "0";
+
+    updateDisplay();
+
+}
+
+
+/* =========================================
+   BACKSPACE
+========================================= */
+
+function backspace() {
+
+    expression =
+        expression.slice(0, -1);
+
+    updateDisplay();
+
+}
+
+
+/* =========================================
+   CONVERT EXPRESSION
+========================================= */
+
+function convertExpression(input) {
+
+    let x = input;
+
+
+    /* Remove spaces */
+
+    x = x.replace(/\s+/g, "");
+
+
+    /* Constants */
+
+    x = x.replace(/π/g, "Math.PI");
+
+    x = x.replace(/\be\b/g, "Math.E");
+
+
+    /* Scientific functions */
+
+    x = x.replace(/sqrt\(/g, "Math.sqrt(");
+
+    x = x.replace(/sin\(/g, "Math.sin(");
+
+    x = x.replace(/cos\(/g, "Math.cos(");
+
+    x = x.replace(/tan\(/g, "Math.tan(");
+
+    x = x.replace(/log\(/g, "Math.log10(");
+
+    x = x.replace(/ln\(/g, "Math.log(");
+
+
+    /* Powers */
+
+    x = x.replace(/\^/g, "**");
+
+
+    return x;
+
+}
+
+
+/* =========================================
+   VALIDATE EXPRESSION
+========================================= */
+
+function isValidExpression(input) {
+
+    /*
+       Only allow calculator characters
+       and our known scientific functions.
+    */
+
+    const allowed =
+        /^[0-9+\-*/().πe^a-z]*$/;
+
+    if (!allowed.test(input)) {
+        return false;
+    }
+
+
+    /*
+       Only these function names are allowed.
+    */
+
+    const test =
+        input
+        .replace(/sin/g, "")
+        .replace(/cos/g, "")
+        .replace(/tan/g, "")
+        .replace(/sqrt/g, "")
+        .replace(/log/g, "")
+        .replace(/ln/g, "");
+
+
+    /*
+       If letters are still present,
+       something invalid was entered.
+    */
+
+    if (/[a-df-km-zA-Z]/.test(test)) {
+        return false;
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================
+   BALANCE PARENTHESES
+========================================= */
+
+function balanceParentheses(input) {
+
+    let open = 0;
+    let close = 0;
+
+    for (let char of input) {
+
+        if (char === "(") {
+            open++;
+        }
+
+        if (char === ")") {
+            close++;
+        }
+
+    }
+
+    /*
+       Automatically close unfinished
+       scientific functions.
+
+       Example:
+
+       sqrt(16
+
+       becomes:
+
+       sqrt(16)
+    */
+
+    if (open > close) {
+
+        input += ")".repeat(open - close);
+
+    }
+
+    return input;
+
+}
+
+
+/* =========================================
+   CALCULATE
+========================================= */
+
+function calculate() {
+
+    if (expression === "") {
+        return;
+    }
+
+
+    try {
+
+        /* Validate */
+
+        if (!isValidExpression(expression)) {
+
+            throw new Error("Invalid expression");
+
+        }
+
+
+        /*
+           Automatically close brackets.
+        */
+
+        let finalExpression =
+            balanceParentheses(expression);
+
+
+        /*
+           Convert to JavaScript.
+        */
+
+        let jsExpression =
+            convertExpression(finalExpression);
+
+
+        /*
+           Calculate.
+
+           Example:
+
+           sqrt(16)
+
+           becomes
+
+           Math.sqrt(16)
+
+           and gives:
+
+           4
+        */
+
+        let value =
+            Function(
+                '"use strict"; return (' +
+                jsExpression +
+                ')'
+            )();
+
+
+        /*
+           Check result.
+        */
+
+        if (
+            typeof value !== "number" ||
+            !Number.isFinite(value)
+        ) {
+
+            throw new Error("Math error");
+
+        }
+
+
+        /*
+           Remove tiny floating-point errors.
+
+           Example:
+
+           sin(π)
+
+           may internally produce
+           1.224646799e-16 instead of 0.
+        */
+
+        if (Math.abs(value) < 1e-12) {
+            value = 0;
+        }
+
+
+        /*
+           Keep result readable.
+        */
+
+        let result =
+            Number(value.toPrecision(12));
+
+
+        resultDisplay.textContent =
+            result;
+
+
+        /*
+           Save history.
+        */
+
+        addToHistory(
+            finalExpression,
+            result
+        );
+
+
+    } catch (error) {
+
+        resultDisplay.textContent =
+            "Error";
+
+    }
+
+}
+
+
+/* =========================================
+   HISTORY
+========================================= */
+
+function addToHistory(expr, result) {
+
+    history.unshift({
+
+        expression: expr,
+
+        result: result
+
+    });
+
+
+    /*
+       Keep maximum 30 calculations.
+    */
+
+    if (history.length > 30) {
+
+        history.pop();
+
+    }
+
+
+    saveHistory();
+
+    updateHistory();
+
+}
+
+
+function saveHistory() {
+
+    try {
+
+        localStorage.setItem(
+            "calculatorHistory",
+            JSON.stringify(history)
+        );
+
+    } catch {
+
+        /*
+           Ignore storage errors.
+        */
+
+    }
+
+}
+
+
+function updateHistory() {
+
+    historyList.innerHTML = "";
+
+
+    if (history.length === 0) {
+
+        historyList.textContent =
+            "No calculations yet.";
+
+        return;
+
+    }
+
+
+    history.forEach(item => {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "history-item";
+
+        div.innerHTML =
+            item.expression +
+            "<br><b>= " +
+            item.result +
+            "</b>";
+
+        historyList.appendChild(div);
+
+    });
+
+}
+
+
+function clearHistory() {
+
+    history = [];
+
+    try {
+
+        localStorage.removeItem(
+            "calculatorHistory"
+        );
+
+    } catch {
+
+        /* Ignore storage errors */
+
+    }
+
+    updateHistory();
+
+}
+
+
+/* =========================================
+   NORMAL / SCIENTIFIC MODE
+========================================= */
+
+normalButton.onclick = function() {
+
+    scientificButtons.classList.remove("show");
+
+    normalButton.classList.add("active");
+
+    scientificButton.classList.remove("active");
+
+};
+
+
+scientificButton.onclick = function() {
+
+    scientificButtons.classList.add("show");
+
+    scientificButton.classList.add("active");
+
+    normalButton.classList.remove("active");
+
+};
+
+
+/* =========================================
+   HISTORY BUTTON
+========================================= */
+
+historyButton.onclick = function() {
+
+    historyPanel.classList.toggle("show");
+
+};
+
+
+/* =========================================
+   KEYBOARD SUPPORT
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        const key = event.key;
+
+
+        /*
+           Numbers and operators.
+        */
+
+        if ("0123456789".includes(key)) {
+
+            addValue(key);
+
+            return;
+
+        }
+
+
+        if ("+-*/().".includes(key)) {
+
+            addValue(key);
+
+            return;
+
+        }
+
+
+        /*
+           Enter = calculate
+        */
+
+        if (
+            key === "Enter" ||
+            key === "="
+        ) {
+
+            calculate();
+
+            return;
+
+        }
+
+
+        /*
+           Backspace
+        */
+
+        if (key === "Backspace") {
+
+            backspace();
+
+            return;
+
+        }
+
+
+        /*
+           Escape = clear
+        */
+
+        if (key === "Escape") {
+
+            clearCalculator();
+
+            return;
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   STARTUP
+========================================= */
+
+updateDisplay();
+
+updateHistory();
+
+</script>
+
+</body>
+</html>
